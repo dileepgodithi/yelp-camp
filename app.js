@@ -1,29 +1,59 @@
 var express = require('express');
 var app = express();
 var bodyParser = require('body-parser');
+var mongoose = require('mongoose');
+
+mongoose.connect('mongodb://localhost:27017/yelp-camp',{useNewUrlParser : true, useUnifiedTopology : true});
 
 app.use(bodyParser.urlencoded({extended: true}));
 app.set("view engine", "ejs");
 
-var campgrounds = [
-    {name:"Chikmagalur", image: "https://images.thrillophilia.com/image/upload/s--uvfbIP-Y--/c_fill,f_auto,fl_strip_profile,g_center,h_642,q_auto,w_1280/v1/images/photos/000/116/858/original/1566994686_shutterstock_358158608.jpg.jpg"},
-    {name:"Gokarna", image: "https://img.traveltriangle.com/blog/wp-content/tr:w-700,h-400/uploads/2017/10/Beach-Trekking-In-Gokarna.jpg"},
-    {name:"Goa", image: "https://www.getsetcamp.com/blog/wp-content/uploads/2017/09/Cola_Beach_Sunset_Bay_Camping_With_Breakfast_In_Goa1-1024x678.jpg"},
-    {name:"Chikmagalur", image: "https://images.thrillophilia.com/image/upload/s--uvfbIP-Y--/c_fill,f_auto,fl_strip_profile,g_center,h_642,q_auto,w_1280/v1/images/photos/000/116/858/original/1566994686_shutterstock_358158608.jpg.jpg"},
-    {name:"Gokarna", image: "https://img.traveltriangle.com/blog/wp-content/tr:w-700,h-400/uploads/2017/10/Beach-Trekking-In-Gokarna.jpg"},
-    {name:"Goa", image: "https://www.getsetcamp.com/blog/wp-content/uploads/2017/09/Cola_Beach_Sunset_Bay_Camping_With_Breakfast_In_Goa1-1024x678.jpg"},
-    {name:"Chikmagalur", image: "https://images.thrillophilia.com/image/upload/s--uvfbIP-Y--/c_fill,f_auto,fl_strip_profile,g_center,h_642,q_auto,w_1280/v1/images/photos/000/116/858/original/1566994686_shutterstock_358158608.jpg.jpg"},
-    {name:"Gokarna", image: "https://img.traveltriangle.com/blog/wp-content/tr:w-700,h-400/uploads/2017/10/Beach-Trekking-In-Gokarna.jpg"},
-    {name:"Goa", image: "https://www.getsetcamp.com/blog/wp-content/uploads/2017/09/Cola_Beach_Sunset_Bay_Camping_With_Breakfast_In_Goa1-1024x678.jpg"}
+//campground schema setup
+var campgroundSchema = new mongoose.Schema({
+    name : String,
+    image : String
+});
+
+var Campground = mongoose.model("Campground", campgroundSchema);
+
+// Campground.create(
+//     {name:"Gokarna",
+//      image: "https://img.traveltriangle.com/blog/wp-content/tr:w-700,h-400/uploads/2017/10/Beach-Trekking-In-Gokarna.jpg"
+//     }, function(err, campground){
+//         if(err){
+//             console.log("Some problem", err);
+//         }
+//         else{
+//             console.log(campground);
+//         }
+// });
+
+// var campgrounds = [
+//     {name:"Chikmagalur", image: "https://images.thrillophilia.com/image/upload/s--uvfbIP-Y--/c_fill,f_auto,fl_strip_profile,g_center,h_642,q_auto,w_1280/v1/images/photos/000/116/858/original/1566994686_shutterstock_358158608.jpg.jpg"},
+//     {name:"Gokarna", image: "https://img.traveltriangle.com/blog/wp-content/tr:w-700,h-400/uploads/2017/10/Beach-Trekking-In-Gokarna.jpg"},
+//     {name:"Goa", image: "https://www.getsetcamp.com/blog/wp-content/uploads/2017/09/Cola_Beach_Sunset_Bay_Camping_With_Breakfast_In_Goa1-1024x678.jpg"},
+//     {name:"Chikmagalur", image: "https://images.thrillophilia.com/image/upload/s--uvfbIP-Y--/c_fill,f_auto,fl_strip_profile,g_center,h_642,q_auto,w_1280/v1/images/photos/000/116/858/original/1566994686_shutterstock_358158608.jpg.jpg"},
+//     {name:"Gokarna", image: "https://img.traveltriangle.com/blog/wp-content/tr:w-700,h-400/uploads/2017/10/Beach-Trekking-In-Gokarna.jpg"},
+//     {name:"Goa", image: "https://www.getsetcamp.com/blog/wp-content/uploads/2017/09/Cola_Beach_Sunset_Bay_Camping_With_Breakfast_In_Goa1-1024x678.jpg"},
+//     {name:"Chikmagalur", image: "https://images.thrillophilia.com/image/upload/s--uvfbIP-Y--/c_fill,f_auto,fl_strip_profile,g_center,h_642,q_auto,w_1280/v1/images/photos/000/116/858/original/1566994686_shutterstock_358158608.jpg.jpg"},
+//     {name:"Gokarna", image: "https://img.traveltriangle.com/blog/wp-content/tr:w-700,h-400/uploads/2017/10/Beach-Trekking-In-Gokarna.jpg"},
+//     {name:"Goa", image: "https://www.getsetcamp.com/blog/wp-content/uploads/2017/09/Cola_Beach_Sunset_Bay_Camping_With_Breakfast_In_Goa1-1024x678.jpg"}
     
-];
+// ];
 
 app.get('/', function(req, res){
     res.render('landing');
 });
 
 app.get('/campgrounds', function(req, res){
-    res.render("campgrounds",{campgrounds:campgrounds});
+    Campground.find({}, function(err, allCampgrounds){
+        if(err){
+            console.log("Some error", err);
+        }
+        else{
+            res.render("campgrounds",{campgrounds : allCampgrounds});
+        }
+    })
 });
 
 app.post('/campgrounds', function(req, res){
@@ -32,8 +62,17 @@ app.post('/campgrounds', function(req, res){
 
     var newCampground = {name:name, image:image};
 
-    campgrounds.push(newCampground);
-    res.redirect('/campgrounds');
+    //campgrounds.push(newCampground);
+    //add campground to database
+    Campground.create(newCampground, function(err, newEntry){
+        if(err){
+            console.log("Some problem", err);
+        }
+        else{
+            //console.log(newEntry);
+            res.redirect('/campgrounds');
+        }
+    }); 
 });
 
 app.get('/campgrounds/new', function(req, res){
