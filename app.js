@@ -11,14 +11,16 @@ app.set("view engine", "ejs");
 //campground schema setup
 var campgroundSchema = new mongoose.Schema({
     name : String,
-    image : String
+    image : String,
+    description : String
 });
 
 var Campground = mongoose.model("Campground", campgroundSchema);
 
 // Campground.create(
 //     {name:"Gokarna",
-//      image: "https://img.traveltriangle.com/blog/wp-content/tr:w-700,h-400/uploads/2017/10/Beach-Trekking-In-Gokarna.jpg"
+//      image: "https://img.traveltriangle.com/blog/wp-content/tr:w-700,h-400/uploads/2017/10/Beach-Trekking-In-Gokarna.jpg",
+//      description : "This is a beatiful and picturesque location near Goa. Beaches and mountains. Calm atmosphere. Non polluted beaches"
 //     }, function(err, campground){
 //         if(err){
 //             console.log("Some problem", err);
@@ -41,10 +43,12 @@ var Campground = mongoose.model("Campground", campgroundSchema);
     
 // ];
 
+//
 app.get('/', function(req, res){
     res.render('landing');
 });
 
+//
 app.get('/campgrounds', function(req, res){
     Campground.find({}, function(err, allCampgrounds){
         if(err){
@@ -56,11 +60,13 @@ app.get('/campgrounds', function(req, res){
     })
 });
 
+//CREATE campground and save in database
 app.post('/campgrounds', function(req, res){
     var name = req.body.name;
     var image = req.body.image;
+    var desc = req.body.description;
 
-    var newCampground = {name:name, image:image};
+    var newCampground = {name:name, image:image, description : desc};
 
     //campgrounds.push(newCampground);
     //add campground to database
@@ -75,8 +81,22 @@ app.post('/campgrounds', function(req, res){
     }); 
 });
 
+//NEW campground form
 app.get('/campgrounds/new', function(req, res){
     res.render('new');
+});
+
+//SHOW description of a particular campground
+app.get('/campgrounds/:id', function(req, res){
+    Campground.findById(req.params.id, function(err, foundEntry){
+        if(err){
+            console.log("Something wrong",err);
+        }
+        else{
+            res.render('show', {campground : foundEntry});
+        }
+    })
+    // res.render('show');
 });
 
 app.listen(3000, function(){
