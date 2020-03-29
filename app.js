@@ -3,8 +3,8 @@ var app = express();
 var bodyParser = require('body-parser');
 var mongoose = require('mongoose');
 var Campground = require('./models/campground');
+var Comment = require('./models/comment');
 var seedDB = require('./seeds');
-
 
 mongoose.connect('mongodb://localhost:27017/yelp-camp',{useNewUrlParser : true, useUnifiedTopology : true});
 
@@ -23,7 +23,7 @@ app.get('/campgrounds', function(req, res){
             console.log("Some error", err);
         }
         else{
-            res.render("campgrounds",{campgrounds : allCampgrounds});
+            res.render("campgrounds/index",{campgrounds : allCampgrounds});
         }
     })
 });
@@ -51,7 +51,7 @@ app.post('/campgrounds', function(req, res){
 
 //NEW campground form
 app.get('/campgrounds/new', function(req, res){
-    res.render('new');
+    res.render('campgrounds/new');
 });
 
 //SHOW description of a particular campground
@@ -61,11 +61,39 @@ app.get('/campgrounds/:id', function(req, res){
             console.log("Something wrong",err);
         }
         else{
-            res.render('show', {campground : foundEntry});
+            res.render('campgrounds/show', {campground : foundEntry});
         }
     })
     // res.render('show');
 });
+
+//Comments route
+app.get('/campgrounds/:id/comments/new', function(req, res){
+    Campground.findById(req.params.id, function(err, campground){
+        if(err){
+            console.log(err);
+        }
+        else{
+            res.render("comments/new", {campground : campground});
+        }
+    });
+});
+
+//post comments route
+app.post('/campgrounds/:id/comments', function(req, res){
+    Campground.findById(req.params.id, function(err, campground){
+        if(err){
+            console.log(err);
+        }
+        else{
+            Comment.create(req.body.comment, function(err, comment){
+                campground.comments.push(comment);
+                campground.save();
+                res.redirect('/campgrounds/' + campground._id);
+            }); 
+        }
+    })
+})
 
 app.listen(3000, function(){
     console.log("Server started and serving on port 3000");
