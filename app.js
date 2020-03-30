@@ -9,6 +9,10 @@ var Comment = require('./models/comment');
 var User = require('./models/user');
 var seedDB = require('./seeds');
 
+var campgroundsRouter = require('./routes/campgrounds');
+var commentsRouter = require('./routes/comments');
+var indexRouter = require('./routes/index');
+
 mongoose.connect('mongodb://localhost:27017/yelp-camp',{useNewUrlParser : true, useUnifiedTopology : true});
 
 app.use(bodyParser.urlencoded({extended: true}));
@@ -33,7 +37,9 @@ app.use(function(req, res, next){
     next();
 })
 
-
+app.use(campgroundsRouter);
+app.use(commentsRouter);
+app.use(indexRouter);
 
 app.listen(3000, function(){
     console.log("Server started and serving on port 3000");
