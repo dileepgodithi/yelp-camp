@@ -36,7 +36,7 @@ function seedDB(){
                         console.log("added a campground");
                         Comment.create({
                             text : "A simple comment",
-                            author : "John"
+                            author : {id: null,username: "John"}
                         }, function(err, comment){
                             if(err){
                                 console.log(err);
