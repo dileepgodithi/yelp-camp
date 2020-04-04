@@ -27,27 +27,30 @@ function seedDB(){
         }
         else{
             console.log("Removed all campgrounds");
-            data.forEach(function(seed){
-                Campground.create(seed, function(err, campground){
-                    if(err){
-                        console.log(err);
-                    }
-                    else{
-                        console.log("added a campground");
-                        Comment.create({
-                            text : "A simple comment",
-                            author : {id: null,username: "John"}
-                        }, function(err, comment){
-                            if(err){
-                                console.log(err);
-                            }
-                            else{
-                                console.log("comment added");
-                                campground.comments.push(comment);
-                                campground.save();
-                            }
-                        })
-                    }
+            Comment.remove({}, function(err){
+                data.forEach(function(seed){
+                    Campground.create(seed, function(err, campground){
+                        if(err){
+                            console.log(err);
+                        }
+                        else{
+                            console.log("added a campground");
+                            Comment.create({
+                                text : "A simple comment",
+                                author : {id: null,username: "John"}
+                            }, function(err, comment){
+                                if(err){
+                                    console.log(err);
+                                }
+                                else{
+                                    console.log("comment added");
+                                    campground.comments.push(comment);
+                                    campground.author = {id: null,username: "John"};
+                                    campground.save();
+                                }
+                            })
+                        }
+                    });
                 });
             });
         }
