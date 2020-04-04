@@ -52,4 +52,28 @@ router.get('/:id', function(req, res){
     // res.render('show');
 });
 
+//EDIT campground
+router.get('/:id/edit', function(req, res){
+    Campground.findById(req.params.id, function(err, foundCampground){
+        if(err){
+            console.log(err);
+        }
+        else{
+            res.render('campgrounds/edit', {campground : foundCampground});
+        }
+    });
+});
+
+//UPDATE campground
+router.put('/:id', function(req, res){
+    Campground.findOneAndUpdate(req.params.id, req.body.campground, function(err, updatedCampground){
+        if(err){
+            console.log(err);
+        }
+        else{
+            res.redirect('/campgrounds/' + req.params.id);
+        }
+    });
+});
+
 module.exports = router;
